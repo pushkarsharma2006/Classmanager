@@ -84,7 +84,7 @@
     }
     .class-item {
       border-bottom: 1px solid var(--border-color);
-      padding: 10px 40px 10px 10px;
+      padding: 10px 40px 10px 10px; /* add right padding for button */
       position: relative;
       overflow: hidden;
     }
@@ -99,14 +99,13 @@
     .edit-btn {
       float: right;
       background: var(--button-bg);
-      border: none;
+      border: 1px solid var(--accent);
       color: var(--accent);
       padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
       margin-top: -4px;
-      border: 1px solid var(--accent);
       transition: background 0.2s, color 0.2s;
     }
     .edit-btn:hover {
@@ -181,6 +180,16 @@
 
     let classes = JSON.parse(localStorage.getItem('homeTuitionClasses')) || [];
 
+    // Convert "HH:MM" 24h format to 12h format with AM/PM for display
+    function formatTo12Hour(time24) {
+      const [h, m] = time24.split(':');
+      const hour = parseInt(h, 10);
+      const minute = m;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+      return `${hour12}:${minute} ${ampm}`;
+    }
+
     function saveClasses() {
       localStorage.setItem('homeTuitionClasses', JSON.stringify(classes));
     }
@@ -197,8 +206,8 @@
           <div class="class-item" data-index="${index}">
             <strong>Class #${c.classNumber}</strong><br />
             Date: ${c.date}<br />
-            Start Time: ${c.startTime}<br />
-            End Time: <span class="end-time-text">${c.endTime}</span>
+            Start Time: ${formatTo12Hour(c.startTime)}<br />
+            End Time: <span class="end-time-text">${formatTo12Hour(c.endTime)}</span>
             <button class="edit-btn">Edit</button>
           </div>
         `
@@ -210,7 +219,7 @@
           const parent = btn.parentElement;
           const idx = parseInt(parent.getAttribute('data-index'), 10);
 
-          if (parent.querySelector('.edit-container')) return;
+          if (parent.querySelector('.edit-container')) return; // prevent multiple edits
 
           const currentEndTime = classes[idx].endTime;
           const endTimeSpan = parent.querySelector('.end-time-text');
