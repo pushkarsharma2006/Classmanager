@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home Tuition Manager</title>
+  <style>
+    :root {
+      --background: #181a1b;
+      --card-bg: #23272a;
+      --border-color: #36393f;
+      --text: #e5e6e8;
+      --muted: #aaaaaa;
+      --input-bg: #262a2d;
+      --accent: #007BFF;
+      --success: #28a745;
+      --danger: #dc3545;
+      --button-bg: #23272a;
+      --button-hover: #34393e;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background: var(--background);
+      border-radius: 8px;
+      color: var(--text);
+    }
+    h1 {
+      text-align: center;
+      color: var(--text);
+    }
+    form {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 5px var(--border-color);
+      border: 1px solid var(--border-color);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      color: var(--text);
+    }
+    input[type="date"],
+    input[type="time"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text);
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .class-list {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px var(--border-color);
+      border: 1px solid var(--border-color);
+    }
+    .class-item {
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 40px 10px 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .class-item:last-child {
+      border-bottom: none;
+    }
+    .no-classes {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 20px;
+    }
+    .edit-btn {
+      float: right;
+      background: var(--button-bg);
+      border: none;
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: -4px;
+      border: 1px solid var(--accent);
+      transition: background 0.2s, color 0.2s;
+    }
+    .edit-btn:hover {
+      background: var(--button-hover);
+      color: #fff;
+    }
+    .edit-container {
+      margin-top: 8px;
+    }
+    .edit-time {
+      padding: 5px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      width: 130px;
+      margin-right: 10px;
+      background: var(--input-bg);
+      color: var(--text);
+    }
+    .save-btn {
+      background: var(--success);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .save-btn:hover {
+      background: #1e7e34;
+    }
+    .cancel-btn {
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 8px;
+    }
+    .cancel-btn:hover {
+      background: #b02a37;
+    }
+  </style>
+</head>
+<body>
+  <h1>Home Tuition Manager</h1>
+  <form id="classForm">
+    <label for="date">Class Date:</label>
+    <input type="date" id="date" required />
+
+    <label for="startTime">Start Time:</label>
+    <input type="time" id="startTime" required />
+
+    <label for="endTime">End Time:</label>
+    <input type="time" id="endTime" required />
+
+    <label for="classNumber">Class Number (in the month):</label>
+    <input type="number" id="classNumber" min="1" required />
+
+    <button type="submit">Add Class</button>
+  </form>
+
+  <div class="class-list" id="classList">
+    <!-- Classes will be listed here -->
+  </div>
+
+  <script>
+    const form = document.getElementById('classForm');
+    const classList = document.getElementById('classList');
+
+    let classes = JSON.parse(localStorage.getItem('homeTuitionClasses')) || [];
+
+    function saveClasses() {
+      localStorage.setItem('homeTuitionClasses', JSON.stringify(classes));
+    }
+
+    function displayClasses() {
+      if (classes.length === 0) {
+        classList.innerHTML = '<p class="no-classes">No classes scheduled.</p>';
+        return;
+      }
+
+      classList.innerHTML = classes
+        .map(
+          (c, index) => `
+          <div class="class-item" data-index="${index}">
+            <strong>Class #${c.classNumber}</strong><br />
+            Date: ${c.date}<br />
+            Start Time: ${c.startTime}<br />
+            End Time: <span class="end-time-text">${c.endTime}</span>
+            <button class="edit-btn">Edit</button>
+          </div>
+        `
+        )
+        .join('');
+
+      classList.querySelectorAll('.edit-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const parent = btn.parentElement;
+          const idx = parseInt(parent.getAttribute('data-index'), 10);
+
+          if (parent.querySelector('.edit-container')) return;
+
+          const currentEndTime = classes[idx].endTime;
+          const endTimeSpan = parent.querySelector('.end-time-text');
+          endTimeSpan.style.display = 'none';
+
+          const editContainer = document.createElement('div');
+          editContainer.className = 'edit-container';
+
+          editContainer.innerHTML = `
+            <input type="time" class="edit-time" value="${currentEndTime}" />
+            <button class="save-btn">Save</button>
+            <button class="cancel-btn">Cancel</button>
+          `;
+
+          parent.appendChild(editContainer);
+
+          const input = editContainer.querySelector('.edit-time');
+          const saveBtn = editContainer.querySelector('.save-btn');
+          const cancelBtn = editContainer.querySelector('.cancel-btn');
+
+          saveBtn.addEventListener('click', () => {
+            const newEndTime = input.value.trim();
+
+            if (!newEndTime) {
+              alert('End Time cannot be empty.');
+              return;
+            }
+
+            if (newEndTime <= classes[idx].startTime) {
+              alert('End Time should be after Start Time.');
+              return;
+            }
+
+            classes[idx].endTime = newEndTime;
+            saveClasses();
+            displayClasses();
+          });
+
+          cancelBtn.addEventListener('click', () => {
+            editContainer.remove();
+            endTimeSpan.style.display = '';
+          });
+        });
+      });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const date = form.date.value;
+      const startTime = form.startTime.value;
+      const endTime = form.endTime.value;
+      const classNumber = parseInt(form.classNumber.value, 10);
+
+      if (!date || !startTime || !endTime || isNaN(classNumber) || classNumber < 1) {
+        alert('Please fill all fields correctly.');
+        return;
+      }
+
+      if (endTime <= startTime) {
+        alert('End Time should be after Start Time.');
+        return;
+      }
+
+      classes.push({ date, startTime, endTime, classNumber });
+
+      saveClasses();
+      displayClasses();
+
+      form.reset();
+    });
+
+    displayClasses();
+  </script>
+</body>
+</html>
